@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">EasyNote</string>
+    <string name="appwidget_text">EasyNote</string>
+    <string name="add_widget">Add widget</string>
+    <string name="btn_next_text">下翻</string>
+    <string name="btn_pre_text">上翻</string>
+    <string name="btn_more_text">更多</string>
+</resources>
