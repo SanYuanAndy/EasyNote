@@ -83,7 +83,7 @@ public class EasyNoteRemoteViewsFactory implements RemoteViewsService.RemoteView
             Intent itemIntent = new Intent();
             Bundle bundle = new Bundle();
             bundle.putInt(NoteConstants.EXTRA_NAME_ITEMID, i);
-            bundle.putInt(NoteConstants.EXTRA_NAME_NOTEID, header.getNoteId());
+            bundle.putString(NoteConstants.EXTRA_NAME_NOTEID, header.getNoteId());
 
             itemIntent.putExtras(bundle);
 

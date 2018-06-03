@@ -5,4 +5,8 @@
     <string name="btn_next_text">下翻</string>
     <string name="btn_pre_text">上翻</string>
     <string name="btn_more_text">更多</string>
+    <string name="btn_add_note_text">添加</string>
+    <string name="btn_back_text">返回</string>
+    <string name="title_text">标题</string>
+    <string name="content_text">正文</string>
 </resources>

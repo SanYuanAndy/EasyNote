@@ -6,6 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="5dp"
+        >
     <TextView
         android:id="@+id/notes_lv_item_title"
         android:layout_width="wrap_content"
@@ -23,4 +28,6 @@
         android:textSize="15sp"
         android:textColor="#ff000000"
         android:text="Hello World!"/>
+    </RelativeLayout>
+
 </RelativeLayout>

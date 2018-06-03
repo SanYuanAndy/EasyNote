@@ -15,5 +15,9 @@ public class NoteConstants {
 
     public final static String EXTRA_NAME_ITEMID = "note.lv.itemid";
     public final static String EXTRA_NAME_NOTEID = "note.id";
+    public final static String EXTRA_NAME_TITLE = "note.title";
+    public final static String EXTRA_NAME_EASYCONTENT = "note.easycontent";
+
+    public final static int EASY_CONTENT_MAX_LEN = 10;
 
 }

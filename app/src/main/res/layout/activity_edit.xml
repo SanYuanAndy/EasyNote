@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <RelativeLayout
+        android:id="@+id/main_ctrl_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#77777777">
+        <Button
+            android:id="@+id/edit_back_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="@string/btn_back_text"
+            android:background="#00ffffff"
+            />
+    </RelativeLayout>
+    <EditText
+        android:id="@+id/edit_title_etv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:text="@string/title_text"
+        android:maxLines="1"
+        android:layout_below="@id/main_ctrl_label"
+        android:background="#eeeeeeee"/>
+    <RelativeLayout
+        android:id="@+id/edit_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/edit_title_etv"
+        android:background="#77333333"
+        />
+    <EditText
+        android:id="@+id/edit_content_etv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="18sp"
+        android:text="@string/content_text"
+        android:gravity="left|top"
+        android:layout_below="@id/edit_line"
+        android:background="#eeeeeeee"/>
+
+
+
+</RelativeLayout>

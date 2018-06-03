@@ -1,63 +1,79 @@
 package com.sy.easynote.bean;
 
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.sy.easynote.MyApplication;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by ASUS User on 2018/5/12.
  */
 public class PageData {
-    private static String widgetText = "顶顶顶顶顶大大的蛋糕顶顶顶顶顶顶顶强强强强谔谔谔谔荣荣荣荣粤语音乐咩咩咩" +
-            "咩斤斤计较急急急铃铃铃令顶顶顶顶草泥马你你你你你你你就看见了解了解离开家" +
-            "离开家离开家离开家快进来快进来快进来快进来发动机立刻解放对方的拉开距离开发" +
-            "进度了飞机离开阿道夫离开家离开家放大手机看了看" +
-            "空间可怜见立刻觉得浪费卡里克" +
-            "就离开家离开家两节课立即离开" +
-            "六角恐龙" +
-            "看敬礼敬礼敬礼敬礼看见了" +
-            "尽量靠近垃圾垃圾" +
-            "空间链接" +
-            "激发了看见了付款记录了几分将会尽快还款了顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶" +
-            "顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶" +
-            "斤斤计较急急急急急急急急急急急急急急急" +
-            "靠靠靠靠靠靠靠靠靠靠靠靠靠靠靠靠靠靠靠" +
-            "急急急急急急急急急急急急急急急急急急" +
-            "顶顶顶么么么么么啪啪啪啪啪铃铃铃令顶顶顶顶顶" +
-            "顶顶顶顶顶顶哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈大手" +
-            "大脚发放巨大咩咩咩咩咩咩咩" +
-            "噢噢噢噢哦哦哦" +
-            "靠靠靠靠靠靠靠" +
-            "啦啦啦啦啦啦啦" +
-            "了了了了了了";
-
+    private  final static String TAG = PageData.class.getSimpleName();
     private static int currPage = 0;
     private static final int PAGE_SIZE = 100;
     private static boolean isMorePaged = false;
+    private static long note_id_constants = 0;
 
     private static List<EasyNoteHeader> sEasyNoteHeaders = new LinkedList<EasyNoteHeader>();
 
-    private static void init(){
+    private static String genNoteId(){
+        String strNoteId = "";
+        strNoteId = System.currentTimeMillis() + "" + note_id_constants++;
+        return stringToMD5(strNoteId);
+    }
+
+    public static void init(){
         sEasyNoteHeaders.clear();
-        sEasyNoteHeaders.add(new EasyNoteHeader().setTitle("2018年度计划").setEasyContent("1、体重减轻到110"));
-        sEasyNoteHeaders.add(new EasyNoteHeader().setTitle("人生修行").setEasyContent("1、更多的耐心"));
-        sEasyNoteHeaders.add(new EasyNoteHeader().setTitle("梦想").setEasyContent("1、牛皮"));
-        sEasyNoteHeaders.add(new EasyNoteHeader().setTitle("爱情").setEasyContent("1、游戏一场"));
-        sEasyNoteHeaders.add(new EasyNoteHeader().setTitle("工作").setEasyContent("1、一场修行"));
-        sEasyNoteHeaders.add(new EasyNoteHeader().setTitle("家庭").setEasyContent("1、人生的意义"));
+        loadConfig();
+        Log.d(TAG, "size : " + sEasyNoteHeaders.size());
     }
 
     public  static List<EasyNoteHeader> getEasyNoteHeades(){
-        init();
         return sEasyNoteHeaders;
     }
 
+    private static String sCurrNoteId = null;
+
+    public  static void setCurrNoteId(String strNoteId){
+        if (TextUtils.equals(strNoteId, sCurrNoteId)){
+            return;
+        }
+
+        currPage = 0;
+        sCurrNoteId = strNoteId;
+    }
+
+    public static String getWidgetText(String strNoteId){
+        String strPath = MyApplication.getApp().getFilesDir() + File.separator + strNoteId;
+        String strWigdetText = readFile(strPath);
+        return  strWigdetText;
+    }
+
     public static String getCurrPage(){
-        String currPageText = widgetText.substring(currPage*PAGE_SIZE);
+        String currPageText = getWidgetText(sCurrNoteId).substring(currPage*PAGE_SIZE);
         return currPageText;
     }
 
     public static void nextPage(){
-        if (currPage*PAGE_SIZE + PAGE_SIZE >= widgetText.length()){
+        String strCurrWidgetText = getWidgetText(sCurrNoteId);
+        if (currPage*PAGE_SIZE + PAGE_SIZE >= strCurrWidgetText.length()){
             return;
         }
         currPage++;
@@ -73,9 +89,241 @@ public class PageData {
         isMorePaged = !isMorePaged;
     }
 
-    public  static boolean isMorePage(){
+    public static boolean isMorePage(){
         return  isMorePaged;
     }
 
+
+    public  static interface DataChangeListener{
+        public  void onChange();
+    }
+
+    private static Set<DataChangeListener> sDataChangeListeners = new HashSet<DataChangeListener>();
+
+    public  static void addDataChangeListener(DataChangeListener listener){
+        sDataChangeListeners.add(listener);
+    }
+
+    public  static void removeDataChangeListener(DataChangeListener listener){
+        sDataChangeListeners.remove(listener);
+    }
+
+    private static void notifyAllListener(){
+        Iterator<DataChangeListener> it = sDataChangeListeners.iterator();
+        while(it.hasNext()){
+            DataChangeListener listener = it.next();
+            listener.onChange();
+        }
+    }
+
+    private static void notifyDataChanged(){
+        MyApplication.getApp().runWorkerThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyAllListener();
+            }
+        }, 0);
+    }
+    public static void deleteNote(EasyNoteHeader header){
+        boolean bUpdated = true;
+        EasyNoteHeader oldHeader = getEasyNoteHeader(header.getNoteId());
+        if (oldHeader != null) {
+            sEasyNoteHeaders.remove(oldHeader);
+            saveConfig();
+            File f = new File(MyApplication.getApp().getFilesDir() + File.separator + header.getNoteId());
+            if (f.exists()){
+                f.delete();
+            }
+            notifyDataChanged();
+        }
+    }
+
+    public static void save(EasyNoteHeader header, String strContent){
+        boolean bUpdated = true;
+        EasyNoteHeader oldHeader = getEasyNoteHeader(header.getNoteId());
+        if (oldHeader == null) {
+            sEasyNoteHeaders.add(header);
+        }
+
+        String newEasyContent = "";
+        do{
+            if(TextUtils.isEmpty(strContent)){
+                break;
+            }
+
+            if (strContent.length() < NoteConstants.EASY_CONTENT_MAX_LEN){
+                newEasyContent = strContent;
+            }else{
+                newEasyContent = strContent.substring(0, NoteConstants.EASY_CONTENT_MAX_LEN - 1);
+            }
+        }while(false);
+
+        header.setEasyContent(newEasyContent.replace("\n", " "));
+
+        saveConfig();
+        saveFile(MyApplication.getApp().getFilesDir() + File.separator + header.getNoteId(), strContent);
+
+        if (bUpdated){
+            notifyDataChanged();
+        }
+    }
+
+    public static String readContent(EasyNoteHeader header){
+        String strPath = MyApplication.getApp().getFilesDir() + File.separator + header.getNoteId();
+        return readFile(strPath);
+    }
+
+    public static EasyNoteHeader getEasyNoteHeader(String strNoteId) {
+        for (int i = 0; i < sEasyNoteHeaders.size(); ++i) {
+            EasyNoteHeader oldHeader = sEasyNoteHeaders.get(i);
+            if (TextUtils.equals(strNoteId, oldHeader.getNoteId())) {
+                return oldHeader;
+            }
+        }
+        return null;
+    }
+
+
+    public static EasyNoteHeader genEasyNoteHeader(){
+        return new EasyNoteHeader(genNoteId());
+    }
+
+
+
+    private final static String CONFIG_PATH = MyApplication.getApp().getFilesDir() + File.separator + "config";
+    public static void saveConfig() {
+        JSONArray json = new JSONArray();
+        for (EasyNoteHeader header : sEasyNoteHeaders) {
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put(NoteConstants.EXTRA_NAME_NOTEID, header.getNoteId());
+                obj.put(NoteConstants.EXTRA_NAME_TITLE, header.getTitle());
+                obj.put(NoteConstants.EXTRA_NAME_EASYCONTENT, header.getEasyContent());
+                json.put(obj);
+            } catch (Exception e) {
+
+            }
+        }
+        String strContent = json.toString();
+        if (!TextUtils.isEmpty(strContent)){
+            saveFile(CONFIG_PATH, strContent);
+        }
+    }
+
+    private static void loadConfig() {
+        Log.d(TAG, "loadConfig");
+        String strText = readFile(CONFIG_PATH);
+        JSONArray json = null;
+        try {
+            json = new JSONArray(strText);
+            for (int i = 0; i < json.length(); ++i) {
+
+                JSONObject obj = json.getJSONObject(i);
+                if (obj == null) {
+                    continue;
+                }
+
+                String strNoteId = null;
+                try {
+                    strNoteId = obj.getString(NoteConstants.EXTRA_NAME_NOTEID);
+                } catch (Exception e) {
+
+                }
+
+                if (TextUtils.isEmpty(strNoteId)){
+                    continue;
+                }
+                EasyNoteHeader header = new EasyNoteHeader(strNoteId);
+                try {
+                    header.setTitle(obj.getString(NoteConstants.EXTRA_NAME_TITLE));
+                } catch (Exception e) {
+
+                }
+
+                try {
+                    header.setEasyContent(obj.getString(NoteConstants.EXTRA_NAME_EASYCONTENT));
+                } catch (Exception e) {
+
+                }
+
+                sEasyNoteHeaders.add(header);
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+
+
+    public static void saveFile(String strPath, String strContent){
+        File f = new File(strPath);
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(f));
+            writer.write(strContent);
+            writer.close();
+        } catch (Exception e) {
+
+        }
+    }
+
+    public static String readFile(String strPath){
+        File f = new File(strPath);
+        if (!f.exists()) {
+            Log.d(TAG, f.getPath() + " no exist");
+            return "";
+        }
+        BufferedReader reader = null;
+        StringBuilder sb = new StringBuilder();
+        try {
+            reader = new BufferedReader(new FileReader(f));
+            while (true) {
+                String s = reader.readLine();
+                Log.d(TAG, "line:" + s);
+                if (s == null) {
+                    break;
+                }
+                sb.append(s);
+                sb.append("\n");
+            }
+        } catch (Exception e) {
+            return "";
+        }
+
+        if (reader != null){
+            try {
+                reader.close();
+            }catch (Exception e){
+
+            }
+        }
+
+        return sb.toString();
+    }
+
+
+    public static String stringToMD5(String string) {
+        byte[] hash = null;
+
+        try {
+            hash = MessageDigest.getInstance("MD5").digest(string.getBytes());
+        } catch (Exception e) {
+
+        }
+
+
+        StringBuilder hex = new StringBuilder(hash.length * 2);
+        for (byte b : hash) {
+            if ((b & 0xFF) < 0x10) {
+                hex.append("0");
+            }
+            hex.append(Integer.toHexString(b & 0xFF));
+        }
+
+        return hex.toString();
+    }
 
 }

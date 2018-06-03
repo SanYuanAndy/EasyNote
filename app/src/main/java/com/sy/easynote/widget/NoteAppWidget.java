@@ -106,11 +106,11 @@ public class NoteAppWidget extends AppWidgetProvider {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 int itemid = bundle.getInt(NoteConstants.EXTRA_NAME_ITEMID, -1);
-                int noteid = bundle.getInt(NoteConstants.EXTRA_NAME_NOTEID, 0);
+                String noteid = bundle.getString(NoteConstants.EXTRA_NAME_NOTEID, "0");
                 Log.d(TAG, "onReceive itemId :  " + itemid);
                 Log.d(TAG, "onReceive noteId :  " + noteid);
-                if (itemid > -1 && noteid > 0){
-                    selectNote(itemid, noteid);
+                if (itemid > -1 && !TextUtils.isEmpty(noteid)){
+                    selectNote(context, itemid, noteid);
                 }
             }
         }
@@ -145,7 +145,16 @@ public class NoteAppWidget extends AppWidgetProvider {
                 return;
         }
 
+        update(context);
 
+    }
+
+    private void selectNote(Context context, int itemid, String noteid){
+        PageData.setCurrNoteId(noteid);
+        update(context);
+    }
+
+    private void update(Context context){
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         ComponentName componentName = new ComponentName(context, NoteAppWidget.class);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(componentName);
@@ -153,10 +162,6 @@ public class NoteAppWidget extends AppWidgetProvider {
             Log.d(TAG, "onUpdate : " + appWidgetId);
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
-    }
-
-    private void selectNote(int itemid, int noteid){
-
     }
 }
 

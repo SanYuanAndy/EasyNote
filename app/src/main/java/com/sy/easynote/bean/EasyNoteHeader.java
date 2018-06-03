@@ -6,7 +6,11 @@ package com.sy.easynote.bean;
 public class EasyNoteHeader {
     private String mTitle = null;
     private String mEasyContent = null;
-    private int mId = 0;
+    private String mId = "0";
+
+    public  EasyNoteHeader(String strNoteId){
+        mId = strNoteId;
+    }
 
     public EasyNoteHeader setTitle(String strTitle){
         mTitle = strTitle;
@@ -26,7 +30,7 @@ public class EasyNoteHeader {
         return mEasyContent;
     }
 
-    public int getNoteId(){
+    public String getNoteId(){
         return mId;
     }
 }

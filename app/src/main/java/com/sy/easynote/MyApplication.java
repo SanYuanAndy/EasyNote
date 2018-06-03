@@ -8,6 +8,8 @@ import android.os.HandlerThread;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.sy.easynote.bean.PageData;
+
 public class MyApplication extends Application {
 	private final static String TAG = MyApplication.class.getSimpleName();
 	private static MyApplication sApp = null;
@@ -54,6 +56,7 @@ public class MyApplication extends Application {
 		mWorkerThread = new HandlerThread("worker");
 		mWorkerThread.start();
 		mWorkHandler = new Handler(mWorkerThread.getLooper());
+		PageData.init();
 	}
 	
 	public void runUiThread(Runnable oRun, long delay){
