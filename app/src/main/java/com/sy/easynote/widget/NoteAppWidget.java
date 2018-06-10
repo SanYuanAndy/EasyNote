@@ -95,6 +95,7 @@ public class NoteAppWidget extends AppWidgetProvider {
     public void onEnabled(final Context context) {
         Log.d(TAG, "onEnabled");
         // Enter relevant functionality for when the first widget is created
+        PageData.checkNotePage();
         PageData.addDataChangeListener(new PageData.DataChangeListener() {
             @Override
             public void onChange() {
