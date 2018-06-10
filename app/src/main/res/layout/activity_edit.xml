@@ -12,10 +12,11 @@
         android:background="#77777777">
         <Button
             android:id="@+id/edit_back_btn"
-            android:layout_width="wrap_content"
+            android:layout_width="54sp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:text="@string/btn_back_text"
+            android:textSize="@dimen/btn_text_size"
             android:background="#00ffffff"
             />
     </RelativeLayout>
@@ -23,7 +24,7 @@
         android:id="@+id/edit_title_etv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="22sp"
+        android:textSize="@dimen/edit_title_size"
         android:text="@string/title_text"
         android:maxLines="1"
         android:layout_below="@id/main_ctrl_label"
@@ -39,7 +40,7 @@
         android:id="@+id/edit_content_etv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textSize="18sp"
+        android:textSize="@dimen/edit_text_size"
         android:text="@string/content_text"
         android:gravity="left|top"
         android:layout_below="@id/edit_line"

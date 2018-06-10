@@ -1,8 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffffff"
-    android:padding="@dimen/widget_margin">
+    android:background="#ffffffff">
     <RelativeLayout
         android:id="@+id/ctrl_label"
         android:layout_width="match_parent"
@@ -11,28 +10,39 @@
         android:layout_alignParentTop="true">
         <Button
             android:id="@+id/next_page_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="54sp"
+            android:layout_height="32sp"
             android:layout_alignParentRight="true"
             android:text="@string/btn_next_text"
-            android:textSize="@dimen/change_page_btn_text_size"
+            android:textSize="@dimen/widget_btn_text_size"
+            android:gravity="center"
             android:background="#00ffffff"/>
         <Button
             android:id="@+id/pre_page_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="54sp"
+            android:layout_height="32sp"
             android:layout_toLeftOf="@+id/next_page_btn"
             android:text="@string/btn_pre_text"
-            android:textSize="@dimen/change_page_btn_text_size"
+            android:textSize="@dimen/widget_btn_text_size"
+            android:gravity="center"
             android:background="#00ffffff"/>
 
         <Button
             android:id="@+id/more_page_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="54sp"
+            android:layout_height="32sp"
             android:layout_alignParentLeft="true"
             android:text="@string/btn_more_text"
-            android:textSize="@dimen/change_page_btn_text_size"
+            android:textSize="@dimen/widget_btn_text_size"
+            android:background="#00ffffff"/>
+
+        <Button
+            android:id="@+id/edit_page_btn"
+            android:layout_width="54sp"
+            android:layout_height="32sp"
+            android:layout_toRightOf="@id/more_page_btn"
+            android:text="@string/btn_edit_text"
+            android:textSize="@dimen/widget_btn_text_size"
             android:background="#00ffffff"/>
 
     </RelativeLayout>
@@ -41,18 +51,34 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/ctrl_label">
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+        <TextView
+            android:id="@+id/page_title_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffffff"
+            android:text="@string/appwidget_title"
+            android:textSize="@dimen/page_title_size"
+            android:textColor="#ff000000"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="4dp"/>
         <TextView
             android:id="@+id/page_content_tv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="8dp"
             android:background="#ffffffff"
             android:contentDescription="@string/appwidget_text"
             android:text="@string/appwidget_text"
             android:textColor="#ff000000"
-            android:textSize="@dimen/page_text_size"/>
+            android:textSize="@dimen/page_text_size"
+            android:layout_marginLeft="4dp"/>
+        </LinearLayout>
+
         <LinearLayout
+            android:visibility="gone"
             android:id = "@+id/more_notes_layer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

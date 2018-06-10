@@ -16,6 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:text="@string/btn_add_note_text"
+            android:textSize="@dimen/btn_text_size"
             android:background="#00ffffff"/>
     </RelativeLayout>
 

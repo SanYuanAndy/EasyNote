@@ -2,19 +2,10 @@ package com.sy.easynote.bean;
 
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.sy.easynote.MyApplication;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -26,63 +17,70 @@ import java.util.Set;
  */
 public class PageData {
     private  final static String TAG = PageData.class.getSimpleName();
-    private static int currPage = 0;
-    private static final int PAGE_SIZE = 100;
     private static boolean isMorePaged = false;
     private static long note_id_constants = 0;
+    private static NotePage sNotePage = null;
 
     private static List<EasyNoteHeader> sEasyNoteHeaders = new LinkedList<EasyNoteHeader>();
+
 
     private static String genNoteId(){
         String strNoteId = "";
         strNoteId = System.currentTimeMillis() + "" + note_id_constants++;
-        return stringToMD5(strNoteId);
+        return FileUtils.stringToMD5(strNoteId);
     }
 
     public static void init(){
         sEasyNoteHeaders.clear();
         loadConfig();
         Log.d(TAG, "size : " + sEasyNoteHeaders.size());
+        sNotePage = new NotePage();
+        checkNotePage();
+    }
+
+    public static void checkNotePage(){
+        if (sNotePage.isValid()){
+            return;
+        }
+        if (!sEasyNoteHeaders.isEmpty()){
+            EasyNoteHeader header = sEasyNoteHeaders.get(0);
+            if (header != null){
+                sNotePage.setNoteId(header.getNoteId());
+            }
+        }
     }
 
     public  static List<EasyNoteHeader> getEasyNoteHeades(){
         return sEasyNoteHeaders;
     }
 
-    private static String sCurrNoteId = null;
+    public static String getCurrNoteId(){
+        return sNotePage.getNoteId();
+    }
+
+    public static String getWigdetText(){
+        return sNotePage.getText();
+    }
+
+    public static String getWigdetTitle(){
+        String strTitle = "";
+        EasyNoteHeader header = getEasyNoteHeader(sNotePage.getNoteId());
+        if (header != null){
+            strTitle = header.getTitle();
+        }
+        return strTitle;
+    }
 
     public  static void setCurrNoteId(String strNoteId){
-        if (TextUtils.equals(strNoteId, sCurrNoteId)){
-            return;
-        }
-
-        currPage = 0;
-        sCurrNoteId = strNoteId;
-    }
-
-    public static String getWidgetText(String strNoteId){
-        String strPath = MyApplication.getApp().getFilesDir() + File.separator + strNoteId;
-        String strWigdetText = readFile(strPath);
-        return  strWigdetText;
-    }
-
-    public static String getCurrPage(){
-        String currPageText = getWidgetText(sCurrNoteId).substring(currPage*PAGE_SIZE);
-        return currPageText;
+        sNotePage.setNoteId(strNoteId);
     }
 
     public static void nextPage(){
-        String strCurrWidgetText = getWidgetText(sCurrNoteId);
-        if (currPage*PAGE_SIZE + PAGE_SIZE >= strCurrWidgetText.length()){
-            return;
-        }
-        currPage++;
+        sNotePage.nextPage();
     }
 
     public static void prePage(){
-        if (currPage > 0) {
-            currPage--;
-        }
+        sNotePage.prePage();
     }
 
     public static void morePage(){
@@ -161,7 +159,7 @@ public class PageData {
         header.setEasyContent(newEasyContent.replace("\n", " "));
 
         saveConfig();
-        saveFile(MyApplication.getApp().getFilesDir() + File.separator + header.getNoteId(), strContent);
+        FileUtils.saveFile(MyApplication.getApp().getFilesDir() + File.separator + header.getNoteId(), strContent);
 
         if (bUpdated){
             notifyDataChanged();
@@ -170,7 +168,7 @@ public class PageData {
 
     public static String readContent(EasyNoteHeader header){
         String strPath = MyApplication.getApp().getFilesDir() + File.separator + header.getNoteId();
-        return readFile(strPath);
+        return FileUtils.readFile(strPath);
     }
 
     public static EasyNoteHeader getEasyNoteHeader(String strNoteId) {
@@ -206,13 +204,13 @@ public class PageData {
         }
         String strContent = json.toString();
         if (!TextUtils.isEmpty(strContent)){
-            saveFile(CONFIG_PATH, strContent);
+            FileUtils.saveFile(CONFIG_PATH, strContent);
         }
     }
 
     private static void loadConfig() {
         Log.d(TAG, "loadConfig");
-        String strText = readFile(CONFIG_PATH);
+        String strText = FileUtils.readFile(CONFIG_PATH);
         JSONArray json = null;
         try {
             json = new JSONArray(strText);
@@ -247,83 +245,10 @@ public class PageData {
                 }
 
                 sEasyNoteHeaders.add(header);
-
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
-
-
-
-
-    public static void saveFile(String strPath, String strContent){
-        File f = new File(strPath);
-        BufferedWriter writer = null;
-        try {
-            writer = new BufferedWriter(new FileWriter(f));
-            writer.write(strContent);
-            writer.close();
-        } catch (Exception e) {
-
-        }
-    }
-
-    public static String readFile(String strPath){
-        File f = new File(strPath);
-        if (!f.exists()) {
-            Log.d(TAG, f.getPath() + " no exist");
-            return "";
-        }
-        BufferedReader reader = null;
-        StringBuilder sb = new StringBuilder();
-        try {
-            reader = new BufferedReader(new FileReader(f));
-            while (true) {
-                String s = reader.readLine();
-                Log.d(TAG, "line:" + s);
-                if (s == null) {
-                    break;
-                }
-                sb.append(s);
-                sb.append("\n");
-            }
-        } catch (Exception e) {
-            return "";
-        }
-
-        if (reader != null){
-            try {
-                reader.close();
-            }catch (Exception e){
-
-            }
-        }
-
-        return sb.toString();
-    }
-
-
-    public static String stringToMD5(String string) {
-        byte[] hash = null;
-
-        try {
-            hash = MessageDigest.getInstance("MD5").digest(string.getBytes());
-        } catch (Exception e) {
-
-        }
-
-
-        StringBuilder hex = new StringBuilder(hash.length * 2);
-        for (byte b : hash) {
-            if ((b & 0xFF) < 0x10) {
-                hex.append("0");
-            }
-            hex.append(Integer.toHexString(b & 0xFF));
-        }
-
-        return hex.toString();
-    }
-
 }

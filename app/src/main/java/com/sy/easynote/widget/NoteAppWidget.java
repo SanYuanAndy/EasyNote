@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,6 +18,7 @@ import com.sy.easynote.R;
 import com.sy.easynote.bean.EasyNoteRemoteViewService;
 import com.sy.easynote.bean.NoteConstants;
 import com.sy.easynote.bean.PageData;
+import com.sy.easynote.ui.EditActivity;
 
 import java.util.Set;
 
@@ -31,7 +33,8 @@ public class NoteAppWidget extends AppWidgetProvider {
         Bundle widgetOptions = appWidgetManager.getAppWidgetOptions(appWidgetId);
         //printWidgetOptions(widgetOptions);
 
-        CharSequence widgetText = PageData.getCurrPage();
+        CharSequence widgetText = PageData.getWigdetText();
+        CharSequence widgetTitle = PageData.getWigdetTitle();
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.note_app_widget);
 
@@ -43,6 +46,7 @@ public class NoteAppWidget extends AppWidgetProvider {
         views.setRemoteAdapter(R.id.more_notes_lv, intent);
 
         views.setTextViewText(R.id.page_content_tv, widgetText);
+        views.setTextViewText(R.id.page_title_tv, widgetTitle);
 
         int visibleValue = PageData.isMorePage() ? View.VISIBLE : View.INVISIBLE;
         views.setInt(R.id.more_notes_layer, "setVisibility", visibleValue);
@@ -61,6 +65,13 @@ public class NoteAppWidget extends AppWidgetProvider {
         moreIntent.setAction(NoteConstants.ACTION_MORE_PAGE_BTN_ONCLICK);
         PendingIntent morePendingIntent = PendingIntent.getBroadcast(context, 0, moreIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         views.setOnClickPendingIntent(R.id.more_page_btn, morePendingIntent);
+
+        {
+            Intent editIntent = new Intent(context, NoteAppWidget.class);
+            editIntent.setAction(NoteConstants.ACTION_EDIT_PAGE_BTN_ONCLICK);
+            PendingIntent editPendingIntent = PendingIntent.getBroadcast(context, 0, editIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            views.setOnClickPendingIntent(R.id.edit_page_btn, editPendingIntent);
+        }
 
         Intent itemIntent = new Intent(context, NoteAppWidget.class);
         itemIntent.setAction(NoteConstants.ACTION_ITEM_LV_ONCLICK);
@@ -81,9 +92,17 @@ public class NoteAppWidget extends AppWidgetProvider {
     }
 
     @Override
-    public void onEnabled(Context context) {
+    public void onEnabled(final Context context) {
         Log.d(TAG, "onEnabled");
         // Enter relevant functionality for when the first widget is created
+        PageData.addDataChangeListener(new PageData.DataChangeListener() {
+            @Override
+            public void onChange() {
+                notifyDataChanged(context);
+                PageData.checkNotePage();
+                update(context);
+            }
+        });
     }
 
     @Override
@@ -101,7 +120,9 @@ public class NoteAppWidget extends AppWidgetProvider {
         }else if (TextUtils.equals(NoteConstants.ACTION_NEXT_PAGE_BTN_ONCLICK, intent.getAction())){
             changePage(context, NoteConstants.NEXT_PAGE_BTN_CMD);
         }else if (TextUtils.equals(NoteConstants.ACTION_MORE_PAGE_BTN_ONCLICK, intent.getAction())){
-            changePage(context, NoteConstants.MORE_PAGE_BTN_CMD);
+                changePage(context, NoteConstants.MORE_PAGE_BTN_CMD);
+        }else if (TextUtils.equals(NoteConstants.ACTION_EDIT_PAGE_BTN_ONCLICK, intent.getAction())){
+            changePage(context, NoteConstants.EDIT_PAGE_BTN_CMD);
         }else if (TextUtils.equals(NoteConstants.ACTION_ITEM_LV_ONCLICK, intent.getAction())){
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
@@ -141,6 +162,9 @@ public class NoteAppWidget extends AppWidgetProvider {
             case NoteConstants.MORE_PAGE_BTN_CMD:
                 PageData.morePage();
                 break;
+            case NoteConstants.EDIT_PAGE_BTN_CMD:
+                goEdit(context, PageData.getCurrNoteId());
+                break;
             default:
                 return;
         }
@@ -151,6 +175,7 @@ public class NoteAppWidget extends AppWidgetProvider {
 
     private void selectNote(Context context, int itemid, String noteid){
         PageData.setCurrNoteId(noteid);
+        PageData.morePage();
         update(context);
     }
 
@@ -161,6 +186,27 @@ public class NoteAppWidget extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             Log.d(TAG, "onUpdate : " + appWidgetId);
             updateAppWidget(context, appWidgetManager, appWidgetId);
+        }
+    }
+
+    private void notifyDataChanged(Context context){
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        ComponentName componentName = new ComponentName(context, NoteAppWidget.class);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(componentName);
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.more_notes_lv);
+    }
+
+
+    private void goEdit(Context context, String strNoteId){
+        Intent intent = new Intent(context, EditActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Bundle bundle = new Bundle();
+        bundle.putString(NoteConstants.EXTRA_NAME_NOTEID, strNoteId);
+        intent.putExtra("data", bundle);
+        try {
+            context.startActivity(intent);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

@@ -16,18 +16,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxLines="1"
-        android:textSize="20sp"
-        android:textColor="#ff000000"
-        android:text="Hello World!" />
+        android:textSize="@dimen/page_title_size"
+        android:textColor="#ff000000" />
     <TextView
         android:id="@+id/notes_lv_item_easy_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/notes_lv_item_title"
         android:maxLines="1"
-        android:textSize="15sp"
-        android:textColor="#ff000000"
-        android:text="Hello World!"/>
+        android:textSize="@dimen/page_text_size"
+        android:textColor="#ff000000"/>
     </RelativeLayout>
 
 </RelativeLayout>
